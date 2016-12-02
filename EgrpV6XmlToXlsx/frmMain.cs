@@ -120,19 +120,16 @@ namespace EgrpV6XmlToXlsx
                     #region Поля Registration
                     ws.Cells[1, 35].Value = "Уникальный ID записи о праве (ограничении)";
                     ws.Cells[1, 36].Value = "Номер государственной регистрации";
-                    ws.Cells[1, 37].Value = "Код ограничения";
-                    ws.Cells[1, 38].Value = "Вид ограничения";
-                    ws.Cells[1, 39].Value = "Предмет ограничения";
-                    ws.Cells[1, 40].Value = "Дата государственной регистрации";
-                    ws.Cells[1, 41].Value = "Дата начала действия";
-                    ws.Cells[1, 42].Value = "Дата прекращения действия";
-                    ws.Cells[1, 43].Value = "Продолжительность";
-                    ws.Cells[1, 44].Value = "Лица, в пользу которых ограничиваютя права";
-                    ws.Cells[1, 45].Value = "Участники долевого строительства по договорам участия в долевом строительстве";
-                    ws.Cells[1, 46].Value = "Документы - основания регистрации ограничения";
+                    ws.Cells[1, 37].Value = "Код права";
+                    ws.Cells[1, 38].Value = "Вид права";
+                    ws.Cells[1, 39].Value = "Дата государственной регистрации";
+                    ws.Cells[1, 40].Value = "Дата прекращения права";
+                    ws.Cells[1, 41].Value = "Доля";
+                    ws.Cells[1, 42].Value = "Значение доли текстом";
+                    ws.Cells[1, 43].Value = "Документы - основания регистрации права";
                     #endregion
                     #region Поля Encumbrance
-                    ws.Cells[1, 47].Value = "Ограничения права";
+                    ws.Cells[1, 44].Value = "Ограничения права";
                     #endregion
                     var titleRng = ws.Cells[1, 1, 1, 47];
                     titleRng.Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Medium);
@@ -222,42 +219,9 @@ namespace EgrpV6XmlToXlsx
                         ws.Cells[i + 2, 36].Value = objRights[i].Element("Registration").Element("RegNumber").Value;
                         ws.Cells[i + 2, 37].Value = objRights[i].Element("Registration").Element("Type").Value;
                         ws.Cells[i + 2, 38].Value = objRights[i].Element("Registration").Element("Name").Value;
-                        ws.Cells[i + 2, 39].Value = objRights[i].Element("Registration").Element("ShareText") != null ? objRights[i].Element("Registration").Element("ShareText").Value : "";
-                        ws.Cells[i + 2, 40].Value = objRights[i].Element("Registration").Element("RegDate").Value;
-                        ws.Cells[i + 2, 41].Value = objRights[i].Element("Registration").Element("Duration") != null && objRights[i].Element("Registration").Element("Duration").Element("Started") != null ? objRights[i].Element("Registration").Element("Duration").Element("Started").Value : "";
-                        ws.Cells[i + 2, 42].Value = objRights[i].Element("Registration").Element("Duration") != null && objRights[i].Element("Registration").Element("Duration").Element("Stopped") != null ? objRights[i].Element("Registration").Element("Duration").Element("Stopped").Value : "";
-                        ws.Cells[i + 2, 43].Value = objRights[i].Element("Registration").Element("Duration") != null && objRights[i].Element("Registration").Element("Duration").Element("Term") != null ? objRights[i].Element("Registration").Element("Duration").Element("Term").Value : "";
-                        /// TODO: Реализовать импорт владельцев
-                        if (objRights[i].Element("Registration").Elements("Owner") != null && objRights[i].Element("Registration").Elements("Owner").Count() > 0)
-                        {
-                            string owners = "";
-                            List<XElement> ownersList = objRights[i].Element("Registration").Elements("Owner").ToList();
-                            foreach (XElement own in ownersList)
-                            {
-                                owners += "Уникальный ID субъекта: " + own.Element("ID_Subject").Value;
-                                if (own.Element("Person") != null)
-                                {
-                                    string person = " (ФЛ), ";
-
-                                    owners += person;
-                                }
-                                else if (own.Element("Organization") != null)
-                                {
-                                    string organization = " (ЮЛ), ";
-
-                                    owners += organization;
-                                }
-                                else if (own.Element("Governance") != null)
-                                {
-                                    string governance = " (субъект публичного права), ";
-
-                                    owners += governance;
-                                }
-                                owners += ".\r\n";
-                            }
-                            ws.Cells[i + 2, 44].Value = owners;
-                        }
-                        ws.Cells[i + 2, 45].Value = objRights[i].Element("Registration").Element("AllShareOwner") != null ? objRights[i].Element("Registration").Element("AllShareOwner").Value : "";
+                        ws.Cells[i + 2, 39].Value = objRights[i].Element("Registration").Element("RegDate").Value;
+                        ws.Cells[i + 2, 41].Value = objRights[i].Element("Registration").Element("Share") != null ? objRights[i].Element("Registration").Element("Share").Attribute("Numerator").Value + "/" + objRights[i].Element("Registration").Element("Share").Attribute("Denominator").Value : "";
+                        ws.Cells[i + 2, 42].Value = objRights[i].Element("Registration").Element("ShareText") != null ? objRights[i].Element("Registration").Element("ShareText").Value : "";
                         if (objRights[i].Element("Registration").Elements("DocFound") != null && objRights[i].Element("Registration").Elements("DocFound").Count() > 0)
                         {
                             string documents = "";
@@ -274,11 +238,11 @@ namespace EgrpV6XmlToXlsx
                                 documents += docF.Element("IssueOrgan") != null ? ", организация, выдавшая документ: " + docF.Element("IssueOrgan").Value : "";
                                 documents += ".\r\n";
                             }
-                            ws.Cells[i + 2, 46].Value = documents;
+                            ws.Cells[i + 2, 43].Value = documents;
                         }
                         #endregion
                         #region Encumbrances
-                        ws.Cells[i + 2, 47].Value = objRights[i].Elements("Encumbrance") != null ? string.Join(".\r\n\r\n", objRights[i].Elements("Encumbrance").Select(el => GetEncumbranceString(el))) : "";
+                        ws.Cells[i + 2, 44].Value = objRights[i].Elements("Encumbrance") != null ? string.Join(".\r\n\r\n", objRights[i].Elements("Encumbrance").Select(el => GetEncumbranceString(el))) : "";
                         #endregion
                     }
                     ws.Cells[ws.Dimension.Address].AutoFitColumns();
